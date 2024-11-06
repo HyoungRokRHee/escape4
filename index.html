@@ -3,16 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Puzzle</title>
+    <title>Shake to Score Game</title>
     <style>
-        /* 독도체 폰트 불러오기 */
-        @font-face {
-            font-family: 'Dokdo';
-            src: url('./fonts/Dokdo-Regular.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-
         /* 전체 배경 이미지 설정 */
         body {
             background-image: url('https://github.com/HyoungRokRHee/escape1/raw/main/whole.png?raw=true');
@@ -27,84 +19,109 @@
             margin: 0;
             color: white;
             text-align: center;
-            font-family: 'Dokdo', sans-serif;
-            font-size: 1.2em;
+            font-family: Arial, sans-serif;
         }
-        #puzzleSection, #resultSection {
-            display: none;
-            margin-top: 30px; /* 전체 섹션을 아래로 이동 */
+        #gameContainer {
+            display: none; /* 처음에는 숨겨진 상태 */
+            flex-direction: column;
+            align-items: center;
         }
-        img {
-            max-width: 100%;
-            height: auto;
+        #score {
+            font-size: 2em;
+            margin-top: 20px;
         }
-        input, button {
-            padding: 10px;
+        #status {
             font-size: 1em;
-            margin: 10px 0;
-        }
-        h2 {
-            margin-top: 50px;
-        }
-        #passwordMessage {
-            font-size: 0.6em; /* 글자 크기 절반으로 줄이기 */
-            margin-top: 20px; /* 아래로 내리기 */
-            line-height: 1.5em; /* 줄 간격 조절 */
-        }
-        #result.success {
-            color: red;
-            font-weight: bold;
+            color: #ffd700;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <!-- 비밀번호 입력 단계 -->
-    <h2 id="passwordMessage">비밀번호를 입력하세요</h2>
-    <input type="text" id="passwordInput" placeholder="비밀번호 입력">
-    <button id="passwordButton" onclick="checkPassword()">확인</button>
-
-    <!-- 퍼즐 문제 단계 -->
-    <div id="puzzleSection">
-        <p>힌트:title</p>
-        <input type="text" id="answerInput" placeholder="정답 입력">
-        <button onclick="checkAnswer()">확인</button>
+    <!-- 초기 메시지 -->
+    <div id="initialMessage">
+        <h2>내 가장 마지막 기억이 언제인지 찾아냈다...</h2>
+        <p>내 마지막 기억은 2024년 3월 17일이다. 그때 무슨 일이 있었는지 생생하게 기억이 난다.<br>내가 보고 듣고 느꼈던 그 모든 것이...</p>
+        <button onclick="startGame()">게임 시작</button>
     </div>
 
-    <!-- 결과 메시지 -->
-    <p id="result"></p>
+    <!-- 게임 섹션 -->
+    <div id="gameContainer">
+        <h1>Shake to Increase Score!</h1>
+        <p id="score">Score: 0</p>
+        <p id="status">Shake your phone to reach 10,000 points!</p>
+    </div>
 
     <script>
-        // 비밀번호 확인 함수
-        function checkPassword() {
-            const password = document.getElementById("passwordInput").value;
-            if (password === "2290") {
-                document.getElementById("puzzleSection").style.display = "block";
-                document.getElementById("passwordInput").style.display = "none";
-                document.getElementById("passwordButton").style.display = "none";
-                const passwordMessage = document.getElementById("passwordMessage");
-                passwordMessage.innerHTML = "내 가장 마지막 기억이 언제인지 찾아냈다...<br>내 마지막 기억은 2024년 3월 17일이다.<br>그때 무슨 일이 있었는지 생생하게 기억이 난다.<br>내가 보고 듣고 느꼈던 그 모든 것이...";
-                passwordMessage.style.marginTop = "20px"; // 아래로 내리기
+        let score = 0;
+        let lastShakeTime = Date.now();
+
+        // 게임 시작 함수
+        function startGame() {
+            // 초기 메시지 삭제하고 게임 화면 표시
+            document.getElementById("initialMessage").style.display = "none";
+            document.getElementById("gameContainer").style.display = "flex";
+            requestDeviceMotionPermission();
+        }
+
+        // 가속도 권한 요청
+        function requestDeviceMotionPermission() {
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            startShakeDetection();
+                        } else {
+                            document.getElementById('status').textContent = "Device Motion permission denied";
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        document.getElementById('status').textContent = "Error requesting Device Motion permission";
+                    });
             } else {
-                alert("비밀번호가 틀렸습니다. 다시 시도하세요.");
+                startShakeDetection();
             }
         }
 
-        // 퍼즐 정답 확인 함수
-        function checkAnswer() {
-            const answer = document.getElementById("answerInput").value;
-            if (answer === "I am 복이에요") {
-                document.body.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; background-image: url('https://github.com/HyoungRokRHee/escape1/raw/main/whole.png?raw=true'); background-size: cover; margin-top: 30px;">
-                        <h1 style="color: red; font-size: 2em; margin-top: 50px;">소망관 1층<br>주차장으로 가세요.</h1>
-                        <h2 style="color: red; font-size: 1.5em; margin-top: 20px;">비밀번호: 2076</h2>
-                    </div>
-                `;
-            } else {
-                const result = document.getElementById("result");
-                result.textContent = "틀렸습니다. 다시 시도하세요.";
-                result.className = "";
+        // 흔들기 감지 기능
+        function startShakeDetection() {
+            function handleShake(event) {
+                const acceleration = event.accelerationIncludingGravity;
+                const shakeThreshold = 15;
+
+                const totalAcceleration = Math.sqrt(
+                    acceleration.x * acceleration.x +
+                    acceleration.y * acceleration.y +
+                    acceleration.z * acceleration.z
+                );
+
+                if (totalAcceleration > shakeThreshold) {
+                    const currentTime = Date.now();
+                    if (currentTime - lastShakeTime > 500) {
+                        score++;
+                        document.getElementById('score').textContent = `Score: ${score}`;
+                        lastShakeTime = currentTime;
+
+                        if (score >= 10000) {
+                            goToNextPage();
+                        }
+                    }
+                }
             }
+
+            window.addEventListener("devicemotion", handleShake, true);
+        }
+
+        // 다음 페이지로 이동하는 함수
+        function goToNextPage() {
+            document.body.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; background-image: url('https://github.com/HyoungRokRHee/escape1/raw/main/whole.png?raw=true'); background-size: cover;">
+                    <h1 style="color: red; font-size: 2em; margin-top: 50px;">소망관 1층<br>주차장으로 가세요.</h1>
+                    <h2 style="color: red; font-size: 1.5em; margin-top: 20px;">비밀번호: 2076</h2>
+                </div>
+            `;
         }
     </script>
 
