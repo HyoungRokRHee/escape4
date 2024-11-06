@@ -53,14 +53,14 @@
 
     <!-- 게임 시작 버튼 -->
     <div id="startButton">
-        <button onclick="startGame()">게임 시작</button>
+        <button onclick="startGame()">다음</button>
     </div>
 
     <!-- 게임 섹션 -->
     <div id="gameContainer">
-        <h1>Shake to Increase Score!</h1>
+        <h1>흔들어주세요</h1>
         <p id="score">Score: 0</p>
-        <p id="status">Shake your phone to reach 10,000 points!</p>
+        <p id="status">10,000번은 흔들어야 기억이날거같아</p>
     </div>
 
     <script>
@@ -138,8 +138,8 @@
         function goToNextPage() {
             document.body.innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; background-image: url('https://github.com/HyoungRokRHee/escape1/raw/main/whole.png?raw=true'); background-size: cover;">
-                    <h1 style="color: red; font-size: 2em; margin-top: 50px;">소망관 1층<br>주차장으로 가세요.</h1>
-                    <h2 style="color: red; font-size: 1.5em; margin-top: 20px;">비밀번호: 2290</h2>
+                    <h1 style="color: red; font-size: 2em; margin-top: 50px;">지하 2층<br>고등부실로 가세요.</h1>
+                    <h2 style="color: red; font-size: 1.5em; margin-top: 20px;">비밀번호: 8877</h2>
                 </div>
             `;
         }
