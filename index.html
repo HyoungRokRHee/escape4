@@ -37,35 +37,63 @@
         let score = 0;
         let lastShakeTime = Date.now();
 
-        // 가속도 이벤트가 발생할 때 실행되는 함수
-        function handleShake(event) {
-            const acceleration = event.accelerationIncludingGravity;
-            const shakeThreshold = 15; // 흔들기 민감도 (값이 낮을수록 더 쉽게 점수가 올라갑니다)
-
-            // x, y, z 축에서 가속도 합산
-            const totalAcceleration = Math.sqrt(
-                acceleration.x * acceleration.x +
-                acceleration.y * acceleration.y +
-                acceleration.z * acceleration.z
-            );
-
-            // 일정 가속도 이상일 때만 점수 증가
-            if (totalAcceleration > shakeThreshold) {
-                const currentTime = Date.now();
-                // 흔든 횟수를 제한하기 위해 마지막 흔듦으로부터 500ms 이상 경과해야 점수 증가
-                if (currentTime - lastShakeTime > 500) {
-                    score++;
-                    document.getElementById('score').textContent = `Score: ${score}`;
-                    lastShakeTime = currentTime;
-                }
+        function requestDeviceMotionPermission() {
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            startShakeDetection();
+                        } else {
+                            document.getElementById('status').textContent = "Device Motion permission denied";
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        document.getElementById('status').textContent = "Error requesting Device Motion permission";
+                    });
+            } else {
+                // Android 및 iOS 12 이하 장치
+                startShakeDetection();
             }
         }
 
-        // 디바이스 모션 이벤트 리스너 추가
-        if (window.DeviceMotionEvent) {
+        function startShakeDetection() {
+            // 가속도 이벤트가 발생할 때 실행되는 함수
+            function handleShake(event) {
+                const acceleration = event.accelerationIncludingGravity;
+                const shakeThreshold = 15; // 흔들기 민감도 (값이 낮을수록 더 쉽게 점수가 올라갑니다)
+
+                // x, y, z 축에서 가속도 합산
+                const totalAcceleration = Math.sqrt(
+                    acceleration.x * acceleration.x +
+                    acceleration.y * acceleration.y +
+                    acceleration.z * acceleration.z
+                );
+
+                // 일정 가속도 이상일 때만 점수 증가
+                if (totalAcceleration > shakeThreshold) {
+                    const currentTime = Date.now();
+                    // 흔든 횟수를 제한하기 위해 마지막 흔듦으로부터 500ms 이상 경과해야 점수 증가
+                    if (currentTime - lastShakeTime > 500) {
+                        score++;
+                        document.getElementById('score').textContent = `Score: ${score}`;
+                        lastShakeTime = currentTime;
+                    }
+                }
+            }
+
+            // 디바이스 모션 이벤트 리스너 추가
             window.addEventListener("devicemotion", handleShake, true);
-        } else {
-            document.getElementById('status').textContent = "Device Motion not supported";
+        }
+
+        // iOS에서 권한 요청
+        document.addEventListener("click", () => {
+            requestDeviceMotionPermission();
+        }, { once: true });
+
+        // Android 및 기타 장치에서는 곧바로 시작
+        if (!("DeviceMotionEvent" in window) || typeof DeviceMotionEvent.requestPermission !== 'function') {
+            startShakeDetection();
         }
     </script>
 </body>
