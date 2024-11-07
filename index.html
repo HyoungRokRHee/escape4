@@ -60,7 +60,7 @@
     <div id="gameContainer">
         <h1>흔들어주세요</h1>
         <p id="score">Score: 0</p>
-        <p id="status">10,000번은 흔들어야 기억이날거같아</p>
+        <p id="status">1,000번은 흔들어야 기억이날거같아</p>
     </div>
 
     <script>
@@ -124,7 +124,7 @@
                         document.getElementById('score').textContent = `Score: ${score}`;
                         lastShakeTime = currentTime;
 
-                        if (score >= 10000) {
+                        if (score >= 1000) {  // 1000번으로 수정
                             goToNextPage();
                         }
                     }
