@@ -62,7 +62,7 @@
 
     <!-- 게임 섹션 -->
     <div id="gameContainer">
-        <h1>1,0000번은 흔들어야 기억이 나지 않을까...</h1>
+        <h1>1,000번은 흔들어야 기억이 나지 않을까...</h1>
         <p id="score">0</p>
         <p id="status">핸드폰을 좌우로 흔들어주세요</p>
     </div>
@@ -125,7 +125,7 @@
                     const currentTime = Date.now();
                     if (currentTime - lastShakeTime > 500) {
                         score++;
-                        document.getElementById('score').textContent = Score: ${score};
+                        document.getElementById('score').textContent = `Score: ${score}`;
                         lastShakeTime = currentTime;
 
                         if (score >= 1000) {  // 1000번으로 수정
@@ -140,12 +140,12 @@
 
         // 다음 페이지로 이동하는 함수
         function goToNextPage() {
-            document.body.innerHTML = 
+            document.body.innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; background-image: url('https://github.com/HyoungRokRHee/escape1/raw/main/whole.png?raw=true'); background-size: cover;">
                     <h1 style="color: red; font-size: 2em; margin-top: 50px;">지하 2층<br>고등부실로 가세요.</h1>
                     <h2 style="color: red; font-size: 1.5em; margin-top: 20px;">비밀번호: 8877</h2>
                 </div>
-            ;
+            `;
         }
     </script>
 
