@@ -21,10 +21,24 @@
             text-align: center;
             font-family: Arial, sans-serif;
         }
-        #gameContainer, #startButton {
-            display: none; /* 처음에는 숨겨진 상태 */
-            flex-direction: column;
+        #memoryGameContainer {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-gap: 10px;
+            margin-top: 20px;
+            visibility: hidden;
+        }
+        #memoryGameContainer div {
+            background-color: #3498db;
+            color: transparent;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
             align-items: center;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            border-radius: 5px;
         }
         input, button {
             padding: 10px;
@@ -51,91 +65,94 @@
         <button onclick="checkPassword()">확인</button>
     </div>
 
-    <!-- 게임 시작 버튼 -->
-    <div id="startButton">
-        <p>전체적인 기억을 빨리 찾고 싶다...<br>
-        너무 답답해...<br>
-        조금 구시대적인 방법이지만<br>
-        머리를 조금 흔들어보면 기억이 나지 않을까...</p>
-        <button onclick="startGame()">다음</button>
-    </div>
-
-    <!-- 게임 섹션 -->
-    <div id="gameContainer">
-        <h1>1,0000번은 흔들어야 기억이 나지 않을까...</h1>
-        <p id="score">0</p>
-        <p id="status">핸드폰을 좌우로 흔들어주세요</p>
+    <!-- 기억력 게임 섹션 -->
+    <div id="memoryGameContainer">
+        <!-- 4x8 그리드 생성 -->
+        <!-- JavaScript에서 그리드 셀을 추가합니다. -->
     </div>
 
     <script>
-        let score = 0;
-        let lastShakeTime = Date.now();
+        const cardValues = ['🍎', '🍊', '🍇', '🍌', '🍉', '🍍', '🍒', '🍓', '🍎', '🍊', '🍇', '🍌', '🍉', '🍍', '🍒', '🍓',
+                            '🥑', '🥥', '🍋', '🍐', '🍑', '🍒', '🍈', '🍏', '🥑', '🥥', '🍋', '🍐', '🍑', '🍒', '🍈', '🍏'];
+        let shuffledCards = [];
+        let firstCard = null;
+        let secondCard = null;
+        let matchesFound = 0;
 
         // 비밀번호 확인 함수
         function checkPassword() {
             const password = document.getElementById("passwordInput").value;
             if (password === "2076") {
-                document.getElementById("startButton").style.display = "flex"; // 게임 시작 버튼 보이기
+                document.getElementById("memoryGameContainer").style.visibility = "visible"; // 기억력 게임 보이기
                 document.getElementById("initialMessage").style.display = "none"; // 비밀번호 입력 숨기기
+                startMemoryGame();
             } else {
                 alert("비밀번호가 틀렸습니다. 다시 시도하세요.");
             }
         }
 
-        // 게임 시작 함수
-        function startGame() {
-            document.getElementById("startButton").style.display = "none"; // 시작 버튼 숨기기
-            document.getElementById("gameContainer").style.display = "flex"; // 게임 화면 표시
-            requestDeviceMotionPermission();
+        // 기억력 게임 초기화 함수
+        function startMemoryGame() {
+            shuffledCards = shuffle(cardValues.slice());
+            const container = document.getElementById('memoryGameContainer');
+            container.innerHTML = '';
+            shuffledCards.forEach((value, index) => {
+                const card = document.createElement('div');
+                card.dataset.value = value;
+                card.onclick = () => flipCard(card);
+                container.appendChild(card);
+            });
         }
 
-        // 가속도 권한 요청
-        function requestDeviceMotionPermission() {
-            if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            startShakeDetection();
-                        } else {
-                            document.getElementById('status').textContent = "Device Motion permission denied";
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        document.getElementById('status').textContent = "Error requesting Device Motion permission";
-                    });
-            } else {
-                startShakeDetection();
+        // 카드 섞기 함수
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 카드 뒤집기 함수
+        function flipCard(card) {
+            if (card === firstCard || card === secondCard) return; // 동일 카드 클릭 방지
+            card.style.backgroundColor = "#e74c3c";
+            card.style.color = "white";
+            card.textContent = card.dataset.value;
+
+            if (!firstCard) {
+                firstCard = card;
+            } else if (!secondCard) {
+                secondCard = card;
+                checkMatch();
             }
         }
 
-        // 흔들기 감지 기능
-        function startShakeDetection() {
-            function handleShake(event) {
-                const acceleration = event.accelerationIncludingGravity;
-                const shakeThreshold = 15;
-
-                const totalAcceleration = Math.sqrt(
-                    acceleration.x * acceleration.x +
-                    acceleration.y * acceleration.y +
-                    acceleration.z * acceleration.z
-                );
-
-                if (totalAcceleration > shakeThreshold) {
-                    const currentTime = Date.now();
-                    if (currentTime - lastShakeTime > 500) {
-                        score++;
-                        document.getElementById('score').textContent = `Score: ${score}`;
-                        lastShakeTime = currentTime;
-
-                        if (score >= 1000) {  // 1000번으로 수정
-                            goToNextPage();
-                        }
-                    }
+        // 카드 매치 확인 함수
+        function checkMatch() {
+            if (firstCard.dataset.value === secondCard.dataset.value) {
+                matchesFound += 2;
+                resetCards();
+                if (matchesFound === shuffledCards.length) {
+                    goToNextPage();
                 }
+            } else {
+                setTimeout(() => {
+                    firstCard.style.backgroundColor = "#3498db";
+                    firstCard.style.color = "transparent";
+                    firstCard.textContent = "";
+                    secondCard.style.backgroundColor = "#3498db";
+                    secondCard.style.color = "transparent";
+                    secondCard.textContent = "";
+                    resetCards();
+                }, 1000);
             }
+        }
 
-            window.addEventListener("devicemotion", handleShake, true);
+        // 카드 리셋 함수
+        function resetCards() {
+            firstCard = null;
+            secondCard = null;
         }
 
         // 다음 페이지로 이동하는 함수
