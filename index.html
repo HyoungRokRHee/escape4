@@ -1,153 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로기네 탈출 4번</title>
+    <title>멸종위기사랑 다섯번째</title>
+
     <style>
-        /* 전체 배경 이미지 설정 */
         body {
-            background-image: url('https://github.com/HyoungRokRHee/escape1/raw/main/whole.png?raw=true');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
-            color: white;
+            padding: 0;
+            overflow: hidden;
+            background: black;
+        }
+
+        /* 전체 화면 이미지 */
+        #screen {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* UI 박스 */
+        #uiBox {
+            position: fixed;
+            bottom: 40px;
+            width: 100%;
             text-align: center;
-            font-family: Arial, sans-serif;
         }
-        #gameContainer, #startButton {
-            display: none; /* 처음에는 숨겨진 상태 */
-            flex-direction: column;
-            align-items: center;
-        }
+
         input, button {
-            padding: 10px;
-            font-size: 1em;
-            margin: 10px 0;
+            padding: 12px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            border: none;
+            margin-bottom: 8px;
         }
-        #score {
-            font-size: 2em;
-            margin-top: 20px;
-        }
-        #status {
-            font-size: 1em;
-            color: #ffd700;
-            margin-top: 10px;
+
+        button {
+            background: rgba(255,255,255,0.85);
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <!-- 초기 비밀번호 입력 단계 -->
-    <div id="initialMessage">
-        <h2>비밀번호를 입력하세요</h2>
-        <input type="text" id="passwordInput" placeholder="비밀번호 입력">
-        <button onclick="checkPassword()">확인</button>
+    <!-- 메인 이미지 -->
+    <img id="screen"
+         src="https://github.com/HyoungRokRHee/escape1/raw/main/first.png?raw=true">
+
+    <!-- UI 박스 -->
+    <div id="uiBox">
+
+        <!-- 첫 번째 비밀번호 (2076) -->
+        <div id="pwSection1">
+            <input id="pw1" placeholder="비밀번호 입력">
+            <br>
+            <button onclick="checkPw1()">확인</button>
+        </div>
+
+        <!-- 004.png에서의 다음 버튼 -->
+        <div id="nextSection" style="display:none;">
+            <button onclick="goNext()">다음</button>
+        </div>
+
+        <!-- 005.png에서의 두 번째 비밀번호 (0920) -->
+        <div id="pwSection2" style="display:none;">
+            <input id="pw2" placeholder="비밀번호 입력">
+            <br>
+            <button onclick="checkPw2()">확인</button>
+        </div>
+
     </div>
 
-    <!-- 게임 시작 버튼 -->
-    <div id="startButton">
-        <p>전체적인 기억을 빨리 찾고 싶다...<br>
-        너무 답답해...<br>
-        조금 구시대적인 방법이지만<br>
-        머리를 조금 흔들어보면 기억이 나지 않을까...</p>
-        <button onclick="startGame()">다음</button>
-    </div>
+<script>
+    const screen = document.getElementById("screen");
+    let step = 0;
 
-    <!-- 게임 섹션 -->
-    <div id="gameContainer">
-        <h1>1,000번은 흔들어야 기억이 나지 않을까...</h1>
-        <p id="score">0</p>
-        <p id="status">핸드폰을 좌우로 흔들어주세요</p>
-    </div>
+    // 1단계 비밀번호 (2076)
+    function checkPw1() {
+        if (document.getElementById("pw1").value === "2076") {
 
-    <script>
-        let score = 0;
-        let lastShakeTime = Date.now();
+            screen.src =
+                "https://github.com/HyoungRokRHee/escape1/raw/main/004.png?raw=true";
 
-        // 비밀번호 확인 함수
-        function checkPassword() {
-            const password = document.getElementById("passwordInput").value;
-            if (password === "2076") {
-                document.getElementById("startButton").style.display = "flex"; // 게임 시작 버튼 보이기
-                document.getElementById("initialMessage").style.display = "none"; // 비밀번호 입력 숨기기
-            } else {
-                alert("비밀번호가 틀렸습니다. 다시 시도하세요.");
-            }
+            document.getElementById("pwSection1").style.display = "none";
+            document.getElementById("nextSection").style.display = "block";
+
+            step = 1;
+
+        } else {
+            alert("비밀번호가 틀렸습니다!");
         }
+    }
 
-        // 게임 시작 함수
-        function startGame() {
-            document.getElementById("startButton").style.display = "none"; // 시작 버튼 숨기기
-            document.getElementById("gameContainer").style.display = "flex"; // 게임 화면 표시
-            requestDeviceMotionPermission();
+    // 004 → 005
+    function goNext() {
+        if (step === 1) {
+            screen.src =
+                "https://github.com/HyoungRokRHee/escape1/raw/main/005.png?raw=true";
+
+            document.getElementById("nextSection").style.display = "none";
+            document.getElementById("pwSection2").style.display = "block";
+
+            step = 2;
         }
+    }
 
-        // 가속도 권한 요청
-        function requestDeviceMotionPermission() {
-            if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            startShakeDetection();
-                        } else {
-                            document.getElementById('status').textContent = "Device Motion permission denied";
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        document.getElementById('status').textContent = "Error requesting Device Motion permission";
-                    });
-            } else {
-                startShakeDetection();
-            }
+    // 두 번째 비밀번호 (0920)
+    function checkPw2() {
+        if (document.getElementById("pw2").value === "0920") {
+
+            screen.src =
+                "https://github.com/HyoungRokRHee/escape1/raw/main/011.png?raw=true";
+
+            document.getElementById("pwSection2").style.display = "none";
+
+        } else {
+            alert("비밀번호가 틀렸습니다!");
         }
-
-        // 흔들기 감지 기능
-        function startShakeDetection() {
-            function handleShake(event) {
-                const acceleration = event.accelerationIncludingGravity;
-                const shakeThreshold = 15;
-
-                const totalAcceleration = Math.sqrt(
-                    acceleration.x * acceleration.x +
-                    acceleration.y * acceleration.y +
-                    acceleration.z * acceleration.z
-                );
-
-                if (totalAcceleration > shakeThreshold) {
-                    const currentTime = Date.now();
-                    if (currentTime - lastShakeTime > 500) {
-                        score++;
-                        document.getElementById('score').textContent = `Score: ${score}`;
-                        lastShakeTime = currentTime;
-
-                        if (score >= 1000) {  // 1000번으로 수정
-                            goToNextPage();
-                        }
-                    }
-                }
-            }
-
-            window.addEventListener("devicemotion", handleShake, true);
-        }
-
-        // 다음 페이지로 이동하는 함수
-        function goToNextPage() {
-            document.body.innerHTML = `
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; background-image: url('https://github.com/HyoungRokRHee/escape1/raw/main/whole.png?raw=true'); background-size: cover;">
-                    <h1 style="color: red; font-size: 2em; margin-top: 50px;">지하 2층<br>고등부실로 가세요.</h1>
-                    <h2 style="color: red; font-size: 1.5em; margin-top: 20px;">비밀번호: 8877</h2>
-                </div>
-            `;
-        }
-    </script>
+    }
+</script>
 
 </body>
 </html>
